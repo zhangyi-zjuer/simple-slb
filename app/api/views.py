@@ -32,7 +32,13 @@ def get_pool(pool_name):
 def add_member(pool_name):
     param_list = json.loads(request.data)
     for param in param_list:
-        member = UpstreamMember()
+        members = UpstreamMember.query().filter(
+            and_(UpstreamMember.name == param['name'], UpstreamMember.pool_name == pool_name)).all()
+        if len(members) == 0:
+            member = UpstreamMember()
+        else:
+            member = members[0]
+
         member.pool_name = pool_name
         member.name = param['name']
         member.ip = param['ip']
@@ -80,7 +86,7 @@ def deploy(pool_name):
     return json.dumps(m, ensure_ascii=False)
 
 
-@mod.route('/pool/add_or_update', methods=['POST'])
+@mod.route('/pool/add', methods=['POST'])
 def add_pool():
     param = json.loads(request.data)
     pool_name = param['name']

@@ -17,7 +17,8 @@ python setup.py<br>
 /api/pool/<pool_name>/addMember<br>
 /api/pool/<pool_name>/delMember<br>
 /api/pool/<pool_name>/deploy<br>
-/api/pool/add_or_update<br>
 /api/pool/<pool_name>/clear<br>
 /api/pool/<pool_name>/delete<br>
+/api/pool/add<br>
+/api/pool/delete<br>
 
