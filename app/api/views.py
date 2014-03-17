@@ -1,0 +1,132 @@
+# -*- coding: utf-8 -*-
+
+import re
+import os
+import time
+import subprocess
+import json
+from flask import Blueprint, request
+from sqlalchemy import and_
+from app.models import *
+from app.database import session
+from app.util import generate_nginx_config
+
+mod = Blueprint('api', __name__, template_folder='templates', static_folder='static')
+
+
+@mod.before_request
+def get_config():
+    global NGINX_CONFIG_DIR
+    global NGINX_RELOAD_CMD
+
+    NGINX_RELOAD_CMD = Config.query.filter(Config.key == 'NGINX_RELOAD_CMD')[0].value
+    NGINX_CONFIG_DIR = Config.query.filter(Config.key == 'NGINX_CONFIG_DIR')[0].value.rstrip('/')
+
+
+@mod.route('/pool/<pool_name>', methods=['GET'])
+def get_pool(pool_name):
+    return get_nginx_config(pool_name).replace('\n', '<br>').replace('\t', '    ').replace(' ', '&nbsp;')
+
+
+@mod.route('/pool/<pool_name>/addMember', methods=['POST'])
+def add_member(pool_name):
+    param_list = json.loads(request.data)
+    for param in param_list:
+        member = UpstreamMember()
+        member.pool_name = pool_name
+        member.name = param['name']
+        member.ip = param['ip']
+        member.port = param.get('port') or 8080
+        member.weight = param.get('weight') or 100
+        member.max_fails = param.get('maxFails') or 3
+        member.fail_time_out = param.get('failTimeout') or 2
+        session.add(member)
+    session.commit()
+    return json.dumps({'errorCode': 0}, ensure_ascii=False)
+
+
+@mod.route('/pool/<pool_name>/delMember', methods=['POST'])
+def remove_member(pool_name):
+    param_list = json.loads(request.data)
+    for name in param_list:
+        members = UpstreamMember.query.filter(
+            and_(UpstreamMember.name == name, UpstreamMember.pool_name == pool_name)).all()
+        for member in members:
+            session.delete(member)
+    session.commit()
+    save_nginx_config(pool_name)
+    return json.dumps({'errorCode': 0}, ensure_ascii=False)
+
+
+@mod.route('/pool/<pool_name>/clear', methods=['GET'])
+def clear_member(pool_name):
+    members = UpstreamMember.query.filter(UpstreamMember.pool_name == pool_name).all()
+    for member in members:
+        session.delete(member)
+    session.commit()
+    save_nginx_config(pool_name)
+    return json.dumps({'errorCode': 0}, ensure_ascii=False)
+
+
+@mod.route('/pool/<pool_name>/deploy')
+def deploy(pool_name):
+    status = subprocess.Popen(NGINX_RELOAD_CMD, shell=True).wait()
+    m = {'errorCode': status, 'taskId': 123}
+
+    if status != 0:
+        m['message'] = 'Task Failed'
+
+    time.sleep(2)
+    return json.dumps(m, ensure_ascii=False)
+
+
+@mod.route('/pool/add_or_update', methods=['POST'])
+def add_pool():
+    param = json.loads(request.data)
+    pool_name = param['name']
+    pools = Pool.query.filter(Pool.name == pool_name).all()
+    if len(pools) > 0:
+        pool = pools[0]
+    else:
+        pool = Pool()
+
+    pool.name = param['name']
+    pool.port = param.get('port') or 80
+    pool.server_name = param.get('server_name') or 'localhost'
+    pool.location = param.get('location') or '/'
+    session.add(pool)
+    session.commit()
+
+    save_nginx_config(pool_name)
+
+    return json.dumps({'errorCode': 0}, ensure_ascii=False)
+
+
+@mod.route('/pool/<pool_name>/delete', methods=['GET'])
+def del_pool(pool_name):
+    clear_member(pool_name)
+    pools = Pool.query.filter(Pool.name == pool_name).all()
+    for pool in pools:
+        session.delete(pool)
+    session.commit()
+
+    if os.path.exists(NGINX_CONFIG_DIR + '/' + pool_name):
+        os.remove(NGINX_CONFIG_DIR + '/' + pool_name)
+
+    return json.dumps({'errorCode': 0}, ensure_ascii=False)
+
+
+def get_nginx_config(pool_name):
+    pools = Pool.query.filter(Pool.name == pool_name).all()
+    config = ''
+    if len(pools) > 0:
+        config = generate_nginx_config(pools[0])
+    return config
+
+
+def save_nginx_config(pool_name):
+    pools = Pool.query.filter(Pool.name == pool_name).all()
+    if len(pools) > 0:
+        config = generate_nginx_config(pools[0])
+        with open(NGINX_CONFIG_DIR + '/' + pool_name, 'w') as f:
+            f.write(config)
