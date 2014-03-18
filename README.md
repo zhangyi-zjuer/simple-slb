@@ -9,11 +9,6 @@ pip install flask-sqlalchemy<br>
 pip install flask-wtf<br>
 pip install flask-bootstrap<br>
 
-## Setup
-edit setup.py<br>
-change the value of NGINX_CONFIG_DIR and NGINX_CONFIG_DIR<br>
-python setup.py<br>
-
 ## Apis
 /api/pool/pool_name/addMember<br>
 /api/pool/pool_name/delMember<br>
@@ -24,6 +19,9 @@ python setup.py<br>
 /api/pool/delete<br>
 
 ## How to run
-bash restart.sh<br>
+run bash restart.sh to start the server<br>
 It will start gunicorn with port 8888<br>
 Make sure you have permission to run nginx or you can run as root user<br>
+go to http://127.0.0.1:8888/admin/config/edit and config the right value<br>
+make sure that your nginx.conf has include the NGINX_CONFIG_DIR<br>
+click the Deploy button at the right of navigation bar to reload the nginx config
