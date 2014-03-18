@@ -5,9 +5,34 @@ from app.models import *
 from app.database import session
 
 
-def setup_default():
+def setup_config():
     session.add(Config('NGINX_CONFIG_DIR', '/etc/nginx/site-enabled/'))
     session.add(Config('NGINX_RELOAD_CMD', '/usr/sbin/nginx -s reload'))
+    session.commit()
+
+
+def add_test_pool():
+    pool = Pool()
+    pool.name = 'Test'
+    pool.port = 80
+    pool.server_name = 'localhost'
+    pool.location = '/'
+    session.add(pool)
+
+    pool = Pool()
+    pool.name = 'Test1'
+    pool.port = 80
+    pool.server_name = 'localhost'
+    pool.location = '/'
+    session.add(pool)
+
+    pool = Pool()
+    pool.name = 'Test2'
+    pool.port = 80
+    pool.server_name = 'localhost'
+    pool.location = '/'
+    session.add(pool)
+    
     session.commit()
 
 
@@ -31,4 +56,5 @@ def setup():
 
 if __name__ == "__main__":
     setup()
-    setup_default()
+    setup_config()
+    add_test_pool()

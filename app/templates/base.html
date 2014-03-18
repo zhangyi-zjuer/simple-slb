@@ -11,17 +11,19 @@
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Pool</a></li>
-                    <li><a href="#about">Config</a></li>
+                    <li><a href="{{ url_for("admin.get_pool") }}">Pool</a></li>
+                    <li><a href="{{ url_for("admin.config") }}">Config</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right nav-btn">
                     <li>
-                        <button class="btn btn-success">Deploy</button>
+                        <button class="btn btn-success" id="Deploy">Deploy</button>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
+
+
 
 {% endblock %}
 
@@ -44,4 +46,26 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/offcanvas.js') }}"></script>
     {{ super() }}
+
+    <script type="text/javascript">
+        $("#Deploy").click(function () {
+            $("#Deploy").text("Deploying...");
+            $.get("/api/pool/pool_name/deploy")
+                    .done(function (msg) {
+                        $("#Deploy").text("Deploy");
+                        var jsonObj = $.parseJSON(msg);
+                        var errorCode = jsonObj.errorCode
+
+                        if (errorCode == 0) {
+                            alert("Deploy Success!");
+                        } else {
+                            alert(jsonObj.message);
+                        }
+                    })
+                    .fail(function () {
+                        $("#Deploy").text("Deploy");
+                        alert("Deploy Failed!")
+                    })
+        });
+    </script>
 {% endblock %}

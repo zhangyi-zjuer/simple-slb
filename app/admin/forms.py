@@ -14,23 +14,31 @@ class MemberForm(Form):
                         validators=[Required(), NumberRange(min=1, max=65535, message='Out of Range(1 - 65535)')],
                         default=8080)
     weight = IntegerField('Weight',
-                          validators=[Required, NumberRange(min=1, max=10000, message='Out of Range(1 - 10000)')],
+                          validators=[Required(), NumberRange(min=1, max=10000, message='Out of Range(1 - 10000)')],
                           default=100)
     max_fails = IntegerField('MaxFails',
-                             validators=[Required, NumberRange(min=1, max=100, message='Out of Range(1-100)')],
+                             validators=[Required(), NumberRange(min=1, max=100, message='Out of Range(1-100)')],
                              default=3)
     fail_timeout = IntegerField('FailTimeout',
-                                validators=[Required, NumberRange(min=0, max=100, message=('Out or Range(0-100)'))],
+                                validators=[Required(), NumberRange(min=0, max=100, message='Out or Range(0-100)')],
                                 default=2)
-    submit_btn = SubmitField('Add')
+    submit_button = SubmitField('OK')
 
 
 class PoolForm(Form):
-    name = TextField('Name', validators=[Required()])
+    name = TextField('Name',
+                     validators=[Required(), Length(min=2, max=30, message='Invalid Name (Length Between 2 -30)')])
     port = IntegerField('Port',
                         validators=[Required(), NumberRange(min=1, max=65535, message='Out of Range(1 - 65535)')],
                         default=80)
-    server_name = TextField('ServerName', validators=[Required()])
+    server_name = TextField('ServerName', validators=[Required(), Length(min=5, max=30,
+                                                                         message='Invalid ServerName \
+                                                                         (Length Between 5 - 30)')])
     location = TextField('Location', validators=[Required()], default='/')
-    submit_btn = SubmitField('Save')
+    submit_button = SubmitField('OK')
 
+
+class ConfigForm(Form):
+    nginx_config_dir = TextField('Nginx_Config_Dir', validators=[Required()])
+    nginx_reload_cmd = TextField('Nginx_Reload_Cmd', validators=[Required()])
+    submit_button = SubmitField('OK')

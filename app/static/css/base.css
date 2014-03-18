@@ -5,3 +5,8 @@ body {
 .nav-btn {
     padding-top: 8px
 }
+
+.mid-td {
+    text-align: center;
+    vertical-align: middle
+}

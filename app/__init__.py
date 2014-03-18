@@ -19,6 +19,7 @@ app.config.from_object('config')
 def shutdown_session(exception=None):
     database_session.remove()
 
+import views
 
 from api.views import mod as api_module
 from admin.views import mod as admin_module

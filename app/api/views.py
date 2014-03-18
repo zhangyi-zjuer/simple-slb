@@ -32,7 +32,7 @@ def get_pool(pool_name):
 def add_member(pool_name):
     param_list = json.loads(request.data)
     for param in param_list:
-        members = UpstreamMember.query().filter(
+        members = UpstreamMember.query.filter(
             and_(UpstreamMember.name == param['name'], UpstreamMember.pool_name == pool_name)).all()
         if len(members) == 0:
             member = UpstreamMember()
@@ -60,7 +60,6 @@ def remove_member(pool_name):
         for member in members:
             session.delete(member)
     session.commit()
-    save_nginx_config(pool_name)
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
 
@@ -70,17 +69,23 @@ def clear_member(pool_name):
     for member in members:
         session.delete(member)
     session.commit()
-    save_nginx_config(pool_name)
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
 
 @mod.route('/pool/<pool_name>/deploy')
 def deploy(pool_name):
-    status = subprocess.Popen(NGINX_RELOAD_CMD, shell=True).wait()
+    for config_file in os.listdir(NGINX_CONFIG_DIR):
+        os.remove(NGINX_CONFIG_DIR + '/' + config_file)
+
+    save_nginx_config()
+
+    p = subprocess.Popen(NGINX_RELOAD_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    status = p.wait()
+
     m = {'errorCode': status, 'taskId': 123}
 
     if status != 0:
-        m['message'] = 'Task Failed'
+        m['message'] = p.stderr.readline()
 
     time.sleep(2)
     return json.dumps(m, ensure_ascii=False)
@@ -103,8 +108,6 @@ def add_pool():
     session.add(pool)
     session.commit()
 
-    save_nginx_config(pool_name)
-
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
 
@@ -115,9 +118,6 @@ def del_pool(pool_name):
     for pool in pools:
         session.delete(pool)
     session.commit()
-
-    if os.path.exists(NGINX_CONFIG_DIR + '/' + pool_name):
-        os.remove(NGINX_CONFIG_DIR + '/' + pool_name)
 
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
@@ -130,9 +130,9 @@ def get_nginx_config(pool_name):
     return config
 
 
-def save_nginx_config(pool_name):
-    pools = Pool.query.filter(Pool.name == pool_name).all()
-    if len(pools) > 0:
-        config = generate_nginx_config(pools[0])
-        with open(NGINX_CONFIG_DIR + '/' + pool_name, 'w') as f:
+def save_nginx_config():
+    pools = Pool.query.all()
+    for pool in pools:
+        config = generate_nginx_config(pool)
+        with open(NGINX_CONFIG_DIR + '/' + pool.name, 'w') as f:
             f.write(config)

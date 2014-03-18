@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        {#        <div class="jumbotron">#}
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+            <th class="mid-td" style="width: 50%">Key</th>
+            <th class="mid-td" style="width: 50%">Value</th>
+
+            </thead>
+            <tbody>
+            {% for config in configs %}
+                <tr>
+                    <td class="mid-td">
+                        {{ config.key }}
+                    </td>
+                    <td class="mid-td">
+                        {{ config.value }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <hr>
+        <table class="table" style="margin-bottom: 0px">
+            <tr>
+
+                <td class="pull-right" style="border-top: 0px">
+                    <a class="btn btn-primary" type="button" id="confirmall"
+                       href="{{ url_for('admin.edit_config') }}">Edit Config</a>
+                    </p>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+{% endblock %}
