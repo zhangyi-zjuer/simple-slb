@@ -74,20 +74,28 @@ def clear_member(pool_name):
 
 @mod.route('/pool/<pool_name>/deploy')
 def deploy(pool_name):
-    for config_file in os.listdir(NGINX_CONFIG_DIR):
-        os.remove(NGINX_CONFIG_DIR + '/' + config_file)
+    status = -1
+    message = 'Deploy Failed'
 
-    save_nginx_config()
+    try:
+        for config_file in os.listdir(NGINX_CONFIG_DIR):
+            os.remove(NGINX_CONFIG_DIR + '/' + config_file)
 
-    p = subprocess.Popen(NGINX_RELOAD_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    status = p.wait()
+        save_nginx_config()
+
+        p = subprocess.Popen(NGINX_RELOAD_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        status = p.wait()
+        message = p.stderr.readline()
+    except Exception, e:
+        message = str(e)
 
     m = {'errorCode': status, 'taskId': 123}
 
     if status != 0:
-        m['message'] = p.stderr.readline()
+        m['message'] = message
+    else:
+        time.sleep(1)
 
-    time.sleep(2)
     return json.dumps(m, ensure_ascii=False)
 
 

@@ -6,33 +6,30 @@ from app.database import session
 
 
 def setup_config():
-    session.add(Config('NGINX_CONFIG_DIR', '/etc/nginx/site-enabled/'))
+    session.add(Config('NGINX_CONFIG_DIR', '/etc/nginx/sites-enabled/'))
     session.add(Config('NGINX_RELOAD_CMD', '/usr/sbin/nginx -s reload'))
     session.commit()
 
 
 def add_test_pool():
     pool = Pool()
-    pool.name = 'Test'
+    pool.name = 'ppe'
     pool.port = 80
-    pool.server_name = 'localhost'
+    pool.server_name = 'ppe.slb.dp'
     pool.location = '/'
     session.add(pool)
 
-    pool = Pool()
-    pool.name = 'Test1'
-    pool.port = 80
-    pool.server_name = 'localhost'
-    pool.location = '/'
-    session.add(pool)
+    server = UpstreamMember()
+    server.pool_name = 'ppe'
+    server.name = 'admin'
+    server.ip = '127.0.0.1'
+    server.port = 8888
+    server.fail_timeout = 2
+    server.weight = 100
+    server.max_fails = 3
 
-    pool = Pool()
-    pool.name = 'Test2'
-    pool.port = 80
-    pool.server_name = 'localhost'
-    pool.location = '/'
-    session.add(pool)
-    
+    session.add(server)
+
     session.commit()
 
 
