@@ -5,12 +5,12 @@
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
-                <th class="mid-td" style="width: 15%">Name</th>
+                <th class="mid-td" style="width: 10%">Name</th>
                 <th class="mid-td" style="width: 5%">Port</th>
                 <th class="mid-td" style="width: 15%">Domain</th>
-                <th class="mid-td" style="width: 10%">Location</th>
-                <th class="mid-td" style="width: 45%">Members</th>
-                <th class="mid-td" style="width: 10%">OP</th>
+                <th class="mid-td" style="width: 8%">Location</th>
+                <th class="mid-td" style="width: 40%">Members</th>
+                <th class="mid-td" style="width: 22%">OP</th>
             </tr>
             </thead>
             <tbody>
@@ -37,21 +37,15 @@
 
                     <td class="mid-td">
 
-                        <p>
-                            <a class="btn btn-info btn-block" type="button"
-                               href='{{ url_for('admin.edit_pool', pool_name=pool.name) }}'>Edit</a>
-                        </p>
-                                       <p>
-                            <a class="btn btn-primary btn-block" type="button"
-                               href='{{ url_for('admin.pool_members', pool_name=pool.name) }}'>Members</a>
-                        </p>
+                        <a class="btn btn-info" type="button"
+                           href='{{ url_for('admin.edit_pool', pool_name=pool.name) }}'>Edit</a>
+                        <a class="btn btn-primary" type="button"
+                           href='{{ url_for('admin.pool_members', pool_name=pool.name) }}'>Servers</a>
 
-                        <p>
-                            <a class="btn btn-danger btn-block" type="button"
-                               href="{{ url_for('admin.del_pool', pool_name=pool.name) }}"
-                               onclick='{if(confirm("Are you sure to delete?")){return true;}return false;}'>Delete
-                            </a>
-                        </p>
+                        <a class="btn btn-danger" type="button"
+                           href="{{ url_for('admin.del_pool', pool_name=pool.name) }}"
+                           onclick='{if(confirm("Are you sure to delete?")){return true;}return false;}'>Delete
+                        </a>
                     </td>
                 </tr>
             {% endfor %}
