@@ -19,6 +19,7 @@ pip install flask-bootstrap<br>
 /api/pool/delete<br>
 
 ## How to run
+python setup.py to init the database
 run bash restart.sh to start the server<br>
 It will start gunicorn with port 8888<br>
 Make sure you have permission to run nginx or you can run as root user<br>
