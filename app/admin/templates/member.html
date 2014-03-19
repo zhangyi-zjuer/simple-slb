@@ -45,9 +45,7 @@
 
                         <a class="btn btn-info" type="button"
                            href='{{ url_for('admin.edit_member', member_name=member.name, pool_name=pool_name) }}'>Edit</a>
-
-                        &nbsp;&nbsp;&nbsp;
-
+                        &nbsp;&nbsp;
                         <a class="btn btn-danger" type="button"
                            href="{{ url_for('admin.del_member', member_name=member.name, pool_name=pool_name) }}"
                            onclick='{if(confirm("Are you sure to delete?")){return true;}return false;}'>Delete
@@ -64,9 +62,13 @@
             <tr>
 
                 <td class="pull-right" style="border-top: 0px">
-                    <a class="btn btn-primary" type="button" id="confirmall"
-                       href="{{ url_for('admin.add_member', pool_name=pool_name) }}">Add Server</a>
-                    </p>
+                    <a class="btn btn-primary" type="button"
+                       href="{{ url_for('admin.add_member', pool_name=pool_name) }}">Add</a>
+                    &nbsp;&nbsp;
+                    <a class="btn btn-danger" type="button"
+                       href="{{ url_for('admin.clear_member', pool_name=pool_name) }}"
+                       onclick='{if(confirm("Are you sure to clear all servers ?")){return true;}return false;}'>Clear</a>
+
                 </td>
             </tr>
 

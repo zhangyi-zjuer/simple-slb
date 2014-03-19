@@ -35,6 +35,16 @@ def add_member(pool_name):
     return edit_member(pool_name=pool_name)
 
 
+@mod.route('/pool/<pool_name>/member/clear', methods=['GET', 'POST'])
+def clear_member(pool_name):
+    members = UpstreamMember.query.filter(
+        UpstreamMember.pool_name == pool_name).all()
+    for member in members:
+        session.delete(member)
+    session.commit()
+    return redirect(url_for('admin.pool_members', pool_name=pool_name))
+
+
 @mod.route('/pool/<pool_name>/<member_name>/edit', methods=['GET', 'POST'])
 def edit_member(pool_name, member_name=None):
     form = MemberForm()
