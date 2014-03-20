@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import re
 from flask import Blueprint, redirect, url_for, render_template, Markup, request
+from sqlalchemy import and_
+
 from app.models import *
 from app.admin.forms import *
 from app.database import session
-from sqlalchemy import and_
+
 
 mod = Blueprint('admin', __name__, template_folder='templates', static_folder='static')
 

@@ -23,5 +23,5 @@ fi
 
 #重新启动
 pkill gunicorn
-gunicorn -w 2 -b "127.0.0.1:8888" -p "$PID_FILE" --access-logfile "log/access.log" run:app -D
+gunicorn -k gevent -w 2 -b "127.0.0.1:8888" -p "$PID_FILE" --access-logfile "log/access.log" run:app -D
 echo "`date` --  Restart" | tee -a log/restart.log
