@@ -5,7 +5,7 @@ from sqlalchemy import and_
 
 from app.models import *
 from app.admin.forms import *
-from app.database import session
+from app.database import DbUtil
 
 
 mod = Blueprint('admin', __name__, template_folder='templates', static_folder='static')
@@ -40,9 +40,7 @@ def add_member(pool_name):
 def clear_member(pool_name):
     members = UpstreamMember.query.filter(
         UpstreamMember.pool_name == pool_name).all()
-    for member in members:
-        session.delete(member)
-    session.commit()
+    DbUtil.delete(members)
     return redirect(url_for('admin.pool_members', pool_name=pool_name))
 
 
@@ -74,9 +72,7 @@ def edit_member(pool_name, member_name=None):
 def del_member(pool_name, member_name):
     members = UpstreamMember.query.filter(
         and_(UpstreamMember.pool_name == pool_name, UpstreamMember.name == member_name)).all()
-    for member in members:
-        session.delete(member)
-    session.commit()
+    DbUtil.delete(members)
     return redirect(url_for('admin.pool_members', pool_name=pool_name))
 
 
@@ -89,12 +85,9 @@ def pool_members(pool_name):
 @mod.route('/pool/<pool_name>/delete', methods=['GET'])
 def del_pool(pool_name):
     pools = Pool.query.filter(Pool.name == pool_name).all()
-    for pool in pools:
-        session.delete(pool)
+    DbUtil.delete(pools)
     members = UpstreamMember.query.filter(UpstreamMember.pool_name == pool_name).all()
-    for member in members:
-        session.delete(member)
-    session.commit()
+    DbUtil.delete(members)
     return redirect(url_for('admin.get_pool'))
 
 
@@ -139,9 +132,8 @@ def edit_config():
 
     nginx_config_dir.value = form.nginx_config_dir.data
     nginx_reload_cmd.value = form.nginx_reload_cmd.data
-    session.add(nginx_config_dir)
-    session.add(nginx_reload_cmd)
-    session.commit()
+    DbUtil.add([nginx_config_dir, nginx_reload_cmd])
+
     return redirect(url_for('admin.config'))
 
 
@@ -163,8 +155,7 @@ def add_form_data_to_db(obj, form):
             setattr(obj, attr, getattr(form, attr).data)
             print attr, getattr(form, attr).data
 
-    session.add(obj)
-    session.commit()
+    DbUtil.add(obj)
 
 
 def get_form_from_db(obj, form):

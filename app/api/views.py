@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import re
 import os
 import time
 import subprocess
 import json
+
 from flask import Blueprint, request
 from sqlalchemy import and_
+
 from app.models import *
-from app.database import session
+from app.database import DbUtil
 from app.util import generate_nginx_config
+
 
 mod = Blueprint('api', __name__, template_folder='templates', static_folder='static')
 
@@ -31,6 +33,7 @@ def get_pool(pool_name):
 @mod.route('/pool/<pool_name>/addMember', methods=['POST'])
 def add_member(pool_name):
     param_list = json.loads(request.data)
+    add_members = []
     for param in param_list:
         members = UpstreamMember.query.filter(
             and_(UpstreamMember.name == param['name'], UpstreamMember.pool_name == pool_name)).all()
@@ -46,8 +49,8 @@ def add_member(pool_name):
         member.weight = param.get('weight') or 100
         member.max_fails = param.get('maxFails') or 3
         member.fail_time_out = param.get('failTimeout') or 2
-        session.add(member)
-    session.commit()
+        add_members.append(member)
+    DbUtil.add(add_members)
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
 
@@ -57,25 +60,20 @@ def remove_member(pool_name):
     for name in param_list:
         members = UpstreamMember.query.filter(
             and_(UpstreamMember.name == name, UpstreamMember.pool_name == pool_name)).all()
-        for member in members:
-            session.delete(member)
-    session.commit()
+        DbUtil.delete(members)
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
 
 @mod.route('/pool/<pool_name>/clear', methods=['GET'])
 def clear_member(pool_name):
     members = UpstreamMember.query.filter(UpstreamMember.pool_name == pool_name).all()
-    for member in members:
-        session.delete(member)
-    session.commit()
+    DbUtil.delete(members)
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
 
 @mod.route('/pool/<pool_name>/deploy')
 def deploy(pool_name):
     status = -1
-    message = 'Deploy Failed'
 
     try:
         for config_file in os.listdir(NGINX_CONFIG_DIR):
@@ -92,7 +90,7 @@ def deploy(pool_name):
     m = {'errorCode': status, 'taskId': 123}
 
     if status != 0:
-        m['message'] = message
+        m['message'] = message or 'Deploy Failed'
     else:
         time.sleep(1)
 
@@ -113,8 +111,7 @@ def add_pool():
     pool.port = param.get('port') or 80
     pool.server_name = param.get('server_name') or 'localhost'
     pool.location = param.get('location') or '/'
-    session.add(pool)
-    session.commit()
+    DbUtil.add(pool)
 
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 
@@ -123,9 +120,7 @@ def add_pool():
 def del_pool(pool_name):
     clear_member(pool_name)
     pools = Pool.query.filter(Pool.name == pool_name).all()
-    for pool in pools:
-        session.delete(pool)
-    session.commit()
+    DbUtil.delete(pools)
 
     return json.dumps({'errorCode': 0}, ensure_ascii=False)
 

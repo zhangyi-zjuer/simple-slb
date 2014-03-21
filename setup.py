@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 # Created by zhangyi on 14-3-14.
 import os
+
 from app.models import *
-from app.database import session
+from app.database import DbUtil
 
 
 def setup_config():
-    session.add(Config('NGINX_CONFIG_DIR', '/etc/nginx/sites-enabled/'))
-    session.add(Config('NGINX_RELOAD_CMD', '/usr/sbin/nginx -s reload'))
-    session.commit()
+    DbUtil.add([Config('NGINX_CONFIG_DIR', '/etc/nginx/sites-enabled/'),
+                Config('NGINX_RELOAD_CMD', '/usr/sbin/nginx -s reload')])
 
 
 def add_test_pool():
@@ -17,7 +17,6 @@ def add_test_pool():
     pool.port = 80
     pool.server_name = 'ppe.slb.dp'
     pool.location = '/'
-    session.add(pool)
 
     server = UpstreamMember()
     server.pool_name = 'ppe'
@@ -28,9 +27,7 @@ def add_test_pool():
     server.weight = 100
     server.max_fails = 3
 
-    session.add(server)
-
-    session.commit()
+    DbUtil.add([pool, server])
 
 
 def setup():
