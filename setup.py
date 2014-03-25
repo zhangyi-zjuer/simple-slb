@@ -34,7 +34,7 @@ def setup():
     if os.path.exists('./slb.db'):
         print "Database File 'slb.db' already exsits"
         r = raw_input("Do you want re setup (y/n) : ").lower()
-        while not (r == 'y' or r == 'n' or r == 'yes' or r == 'no'):
+        while not r in ['y', 'n', 'yes', 'no']:
             r = raw_input("Please Enter correct character (y or n): ").lower()
 
         if 'y' in r:
