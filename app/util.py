@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 # Created by zhangyi on 14-3-17.
 from flask import Markup
-from app.models import *
+
 
 NGINX_CONFIG_TEMPLATE = """
 server {
     listen ${port};
     server_name ${server_name};
+    ${access_log}
+    ${error_log}
+
     ${location}
 }
+
 ${upstream}
 """
 
@@ -33,39 +37,49 @@ def str_to_html(s):
     return Markup(s)
 
 
-def generate_nginx_config(pool):
+def generate_nginx_config(server):
     """
-    Get pool config
+    Get server config
     """
-    server_name = pool.server_name or 'localhost'
-    upstream_members = UpstreamMember.query.filter(UpstreamMember.pool_name == pool.name).all()
-    port = pool.port or 80
+    server_name = server.server_name or '_'
+    port = server.port or 80
+    access_log = 'access_log ' + server.access_log + ';' if server.access_log else ''
+    error_log = 'error_log ' + server.error_log + ';' if server.error_log else ''
+    pools = server.pools
 
-    upstream = []
-    location = ''
-    upstream_name = pool.name + '.upstream'
+    locations = []
+    upstreams = []
 
-    if upstream_members and len(upstream_members) > 0:
-        location = LOCATION_TEMPLATE.replace('${location}', pool.location)
-        location = location.replace('${upstream_name}', upstream_name)
-        for upstream_member in upstream_members:
-            server = 'server %s:%d max_fails=%d weight=%d fail_timeout=%ds;' % (
-                upstream_member.ip, upstream_member.port or 8080, upstream_member.max_fails or 3,
-                upstream_member.weight or 100, upstream_member.fail_timeout or 2)
-            upstream.append(server)
+    for pool in pools:
+        members = pool.members
+        upstream = []
+        location = ''
+        upstream_name = 'upstream-' + str(pool.id)
 
-    if len(upstream) > 0:
-        upstream = UPSTREAM_TEMPLATE.replace('${proxys}', '\n    '.join(upstream)).replace('${upstream_name}',
-                                                                                           upstream_name)
-    else:
-        upstream = ''
+        if members:
+            location = LOCATION_TEMPLATE.replace('${location}', pool.location)
+            location = location.replace('${upstream_name}', upstream_name)
+            for member in members:
+                server = 'server %s:%d max_fails=%d weight=%d fail_timeout=%ds;' % (
+                    member.ip, member.port or 8080, member.max_fails or 3,
+                    member.weight or 100, member.fail_timeout or 2)
+                upstream.append(server)
+
+        if len(upstream) > 0:
+
+            upstream = UPSTREAM_TEMPLATE.replace('${proxys}', '\n    '.join(upstream)).replace('${upstream_name}',
+                                                                                               upstream_name)
+            locations.append(location)
+            upstreams.append(upstream)
 
     replacement = {
         '${port}': port,
         '${server_name}': server_name,
-        '${location}': location.strip(),
-        '${upstream}': upstream.strip()
-    }
+        '${location}': '\n'.join(locations).strip(),
+        '${upstream}': '\n'.join(upstreams).strip(),
+        '${access_log}': access_log,
+        '${error_log}': error_log
+        }
 
     nginx_config = NGINX_CONFIG_TEMPLATE
     for k, v in replacement.iteritems():
@@ -77,17 +91,6 @@ def generate_nginx_config(pool):
 if __name__ == "__main__":
     from app.models import *
 
-    pool = Pool()
-    pool.pool_name = 'just-test'
-    pool.port = 80
-    pool.proxy_path = '/test'
-    pool.server_name = 'just-test.dianping.com'
+    server = Server.query[0]
 
-    um = UpstreamMember()
-    um.port = 8080
-    um.ip = 'www.dianping.com'
-
-    print generate_nginx_config(pool)
-
-
-
+    print generate_nginx_config(server)

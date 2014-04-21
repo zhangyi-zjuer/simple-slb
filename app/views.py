@@ -14,4 +14,4 @@ def favicon():
 @app.route('/')
 @app.route('/index')
 def index():
-    return redirect(url_for('admin.get_pool'))
+    return redirect(url_for('admin.servers'))

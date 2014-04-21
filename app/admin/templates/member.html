@@ -1,25 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="container">
-        {#        <div class="jumbotron">#}
+    <h2>Members Of "{{ pool.location }}" for {{ pool.server.name }}</h2>
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
-                <th class="mid-td" style="width: 15%">Name</th>
-                <th class="mid-td" style="width: 25%">IP</th>
-                <th class="mid-td" style="width: 10%">Port</th>
-                <th class="mid-td" style="width: 10%">Weight</th>
+                <th class="mid-td" style="width: 20%">IP</th>
+                <th class="mid-td" style="width: 20%">Port</th>
+                <th class="mid-td" style="width: 20%">Weight</th>
                 <th class="mid-td" style="width: 10%">MaxFails</th>
-                <th class="mid-td" style="width: 15%">FailTimeOut</th>
-                <th class="mid-td" style="width: 15%">OP</th>
+                <th class="mid-td" style="width: 10%">FailTimeOut</th>
+                <th class="mid-td" style="width: 20%">OP</th>
             </tr>
             </thead>
             <tbody>
             {% for member in members %}
                 <tr>
-                    <td class="mid-td">
-                        {{ member.name }}
-                    </td>
                     <td class="mid-td">
                         {{ member.ip }}
                     </td>
@@ -39,41 +35,33 @@
                         {{ member.fail_timeout }}
                     </td>
 
-
                     <td class="mid-td">
-
-
                         <a class="btn btn-info" type="button"
-                           href='{{ url_for('admin.edit_member', member_name=member.name, pool_name=pool_name) }}'>Edit</a>
+                           href='{{ url_for('admin.edit_member', member_id=member.id) }}'>Edit</a>
                         &nbsp;&nbsp;
                         <a class="btn btn-danger" type="button"
-                           href="{{ url_for('admin.del_member', member_name=member.name, pool_name=pool_name) }}"
+                           href="{{ url_for('admin.del_member', member_id=member.id) }}"
                            onclick='{if(confirm("Are you sure to delete?")){return true;}return false;}'>Delete
                         </a>
-
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-
         <hr>
         <table class="table" style="margin-bottom: 0px">
             <tr>
-
                 <td class="pull-right" style="border-top: 0px">
-                    <a class="btn btn-primary" type="button"
-                       href="{{ url_for('admin.add_member', pool_name=pool_name) }}">Add</a>
-                    &nbsp;&nbsp;
-                    <a class="btn btn-danger" type="button"
-                       href="{{ url_for('admin.clear_member', pool_name=pool_name) }}"
-                       onclick='{if(confirm("Are you sure to clear all servers ?")){return true;}return false;}'>Clear</a>
 
+                     <a class="btn btn-success" type="button"
+                       href="{{ url_for('admin.pools', server_id=pool.server_id) }}">Back</a>
+                    &nbsp;&nbsp;
+
+                    <a class="btn btn-primary" type="button"
+                       href="{{ url_for('admin.add_member', pool_id=pool.id) }}">Add Member</a>
                 </td>
             </tr>
-
         </table>
-        {#        </div>#}
     </div>
 
 {% endblock %}

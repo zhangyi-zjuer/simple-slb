@@ -13,7 +13,7 @@
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for("admin.get_pool") }}">Pool</a></li>
+                    <li><a href="{{ url_for("admin.servers") }}">Pool</a></li>
                     <li><a href="{{ url_for("admin.config") }}">Config</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right nav-btn">
@@ -52,7 +52,7 @@
     <script type="text/javascript">
         $("#Deploy").click(function () {
             $("#Deploy").text("Deploying...");
-            $.get("/api/pool/pool_name/deploy")
+            $.get("/admin/deploy")
                     .done(function (msg) {
                         $("#Deploy").text("Deploy");
                         var jsonObj = $.parseJSON(msg);

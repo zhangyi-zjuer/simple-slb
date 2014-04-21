@@ -11,23 +11,53 @@ def setup_config():
                 Config('NGINX_RELOAD_CMD', '/usr/sbin/nginx -s reload')])
 
 
-def add_test_pool():
+def add_server():
+    server = Server()
+    server.name = 'ppe'
+    server.port = 80
+    server.server_name = 'ppe.slb.dp'
+    server.access_log = '/var/log/nginx/ppe_access.log'
+    server.error_log = '/var/log/nginx/ppe_error.log'
+
     pool = Pool()
-    pool.name = 'ppe'
-    pool.port = 80
-    pool.server_name = 'ppe.slb.dp'
     pool.location = '/'
 
-    server = UpstreamMember()
-    server.pool_name = 'ppe'
-    server.name = 'admin'
-    server.ip = '127.0.0.1'
-    server.port = 8888
-    server.fail_timeout = 2
-    server.weight = 100
-    server.max_fails = 3
+    member = Member()
 
-    DbUtil.add([pool, server])
+    member.ip = '127.0.0.1'
+    member.port = 8888
+    member.fail_timeout = 2
+    member.weight = 100
+    member.max_fails = 3
+
+    pool.members.append(member)
+    server.pools.append(pool)
+
+    pool = Pool()
+    pool.location = '/test'
+
+    member = Member()
+
+    member.ip = '127.0.0.1'
+    member.port = 8888
+    member.fail_timeout = 2
+    member.weight = 100
+    member.max_fails = 3
+
+    pool.members.append(member)
+
+    member = Member()
+
+    member.ip = '127.0.0.1'
+    member.port = 8000
+    member.fail_timeout = 2
+    member.weight = 100
+    member.max_fails = 3
+
+    pool.members.append(member)
+    server.pools.append(pool)
+
+    DbUtil.add([server])
 
 
 def setup():
@@ -51,4 +81,4 @@ def setup():
 if __name__ == "__main__":
     setup()
     setup_config()
-    add_test_pool()
+    add_server()

@@ -21,9 +21,6 @@ def shutdown_session(exception=None):
 
 import views
 
-from api.views import mod as api_module
 from admin.views import mod as admin_module
 
-
-app.register_blueprint(api_module, url_prefix='/api')
 app.register_blueprint(admin_module, url_prefix='/admin')
