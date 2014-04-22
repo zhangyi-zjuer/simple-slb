@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Created by zhangyi on 14-3-17.
+import re
 from flask import Markup
 
 
@@ -19,6 +20,7 @@ ${upstream}
 LOCATION_TEMPLATE = """
     location ${location} {
         proxy_pass http://${upstream_name};
+        ${extra}
     }
 """
 
@@ -54,19 +56,23 @@ def generate_nginx_config(server):
         members = pool.members
         upstream = []
         location = ''
+        extra = pool.extra or ''
+        extra = ('\n' + ' ' * 8).join(
+            [ele.strip().rstrip(';') + ';' for ele in extra.split('\n') if len(ele.strip()) > 0]).strip()
         upstream_name = 'upstream-' + str(pool.id)
 
         if members:
             location = LOCATION_TEMPLATE.replace('${location}', pool.location)
             location = location.replace('${upstream_name}', upstream_name)
+            location = location.replace('${extra}', extra)
+
             for member in members:
                 server = 'server %s:%d max_fails=%d weight=%d fail_timeout=%ds;' % (
-                    member.ip, member.port or 8080, member.max_fails or 3,
+                    member.ip, member.port, member.max_fails or 3,
                     member.weight or 100, member.fail_timeout or 2)
                 upstream.append(server)
 
         if len(upstream) > 0:
-
             upstream = UPSTREAM_TEMPLATE.replace('${proxys}', '\n    '.join(upstream)).replace('${upstream_name}',
                                                                                                upstream_name)
             locations.append(location)
@@ -79,18 +85,18 @@ def generate_nginx_config(server):
         '${upstream}': '\n'.join(upstreams).strip(),
         '${access_log}': access_log,
         '${error_log}': error_log
-        }
+    }
 
     nginx_config = NGINX_CONFIG_TEMPLATE
     for k, v in replacement.iteritems():
         nginx_config = nginx_config.replace(k, str(v))
 
-    return nginx_config.strip()
+    return re.sub(r'(?m)^\s*$', '', nginx_config.strip())
 
 
 if __name__ == "__main__":
     from app.models import *
 
-    server = Server.query[0]
+    server = Server.query[1]
 
     print generate_nginx_config(server)

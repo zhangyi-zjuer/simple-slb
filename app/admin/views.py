@@ -99,7 +99,7 @@ def del_pool(pool_id):
     pool = Pool.query.filter(Pool.id == pool_id)[0]
     server_id = pool.server.id
     DbUtil.delete(pool)
-    return redirect(url_for('admin.pool_members', server_id=server_id))
+    return redirect(url_for('admin.pools', server_id=server_id))
 
 
 @mod.route('/pool/<pool_id>/members')
@@ -108,7 +108,7 @@ def members(pool_id):
     return render_template('member.html', members=pool.members, pool=pool)
 
 
-@mod.route('/pool/<pool_id>/member/add')
+@mod.route('/pool/<pool_id>/member/add', methods=['GET','POST'])
 def add_member(pool_id):
     return edit_member(pool_id=pool_id)
 
@@ -199,14 +199,7 @@ def deploy():
 
 
 def get_members(pool):
-    member_list = []
-    for m in pool.members:
-        s = "%s:%d max_fails=%d weight=%d fail_timeout=%ds" % (
-            m.ip, m.port, m.max_fails, m.weight,
-            m.fail_timeout)
-        member_list.append(s)
-
-    return Markup('<br>'.join(member_list))
+    return Markup('<br>'.join([member.ip + ':' + str(member.port) for member in pool.members]))
 
 
 def add_form_data_to_db(obj, form):

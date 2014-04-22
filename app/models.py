@@ -12,6 +12,7 @@ class Server(Base):
     name = Column(u'Name', CHAR(length=64), unique=True)
     port = Column(u'Port', INTEGER(), nullable=False, default=80)
     server_name = Column(u'ServerName', CHAR(length=255))
+    description = Column(u'Description', TEXT)
     error_log = Column(u'ErrorLog', CHAR(length=255))
     access_log = Column(u'AccessLog', CHAR(length=255))
     pools = relationship('Pool', backref=backref('server'))
@@ -23,6 +24,7 @@ class Pool(Base):
     id = Column(u'ID', INTEGER(), primary_key=True, nullable=False)
     location = Column(u'Location', CHAR(length=32), unique=True)
     description = Column(u'Description', TEXT)
+    extra = Column(u'Extra', TEXT)
     server_id = Column(u'Server.ID', INTEGER, ForeignKey('Server.ID'))
     members = relationship('Member', backref=backref('pool'))
 

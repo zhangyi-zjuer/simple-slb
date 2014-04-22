@@ -2,7 +2,7 @@
 # Created by zhangyi on 14-3-17.
 
 from flask_wtf import Form
-from wtforms import TextField, HiddenField, IntegerField, SubmitField
+from wtforms import TextField, HiddenField, IntegerField, SubmitField, TextAreaField
 from wtforms.validators import Required, NumberRange, Length
 
 
@@ -12,21 +12,19 @@ class ServerForm(Form):
     port = IntegerField('Port',
                         validators=[Required(), NumberRange(min=1, max=65535, message='Out of Range(1 - 65535)')],
                         default=80)
-    server_name = TextField('ServerName', validators=[Required(), Length(min=5, max=30,
-                                                                         message='Invalid ServerName \
-                                                                         (Length Between 5 - 30)')])
+    server_name = TextField('ServerName')
+    description = TextField('Description')
     submit_button = SubmitField('OK')
 
 
 class PoolForm(Form):
     location = TextField('Location', validators=[Required()], default='/')
     description = TextField('Description')
+    extra = TextAreaField('Extra')
     submit_button = SubmitField('OK')
 
 
 class MemberForm(Form):
-    name = TextField('Name', validators=[Required()])
-    pool_name = HiddenField('PoolName', validators=[Required()])
     ip = TextField('Ip', validators=[Required(), Length(min=5, max=50, message='Wrong Ip')])
     port = IntegerField('Port',
                         validators=[Required(), NumberRange(min=1, max=65535, message='Out of Range(1 - 65535)')],

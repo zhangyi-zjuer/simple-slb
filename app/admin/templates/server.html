@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="container">
+        <h2>Servers</h2>
+        <hr/>
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
-                <th class="mid-td" style="width: 20%">Name</th>
+                <th class="mid-td" style="width: 15%">Name</th>
                 <th class="mid-td" style="width: 10%">Port</th>
-                <th class="mid-td" style="width: 30%">Domain</th>
-                <th class="mid-td" style="width: 22%">OP</th>
+                <th class="mid-td" style="width: 25%">Domain</th>
+                <th class="mid-td" style="width: 30%">Description</th>
+                <th class="mid-td" style="width: 20%">OP</th>
             </tr>
             </thead>
             <tbody>
@@ -23,12 +26,15 @@
                     <td class="mid-td">
                         {{ server.server_name or '_' }}
                     </td>
+                    <td class="mid-td">
+                        {{ server.description or 'No Description' }}
+                    </td>
 
                     <td class="mid-td">
-                        <a class="btn btn-info" type="button"
-                           href='{{ url_for('admin.edit_server', server_id=server.id) }}'>Edit</a>
                         <a class="btn btn-primary" type="button"
                            href='{{ url_for('admin.pools', server_id=server.id) }}'>Pools</a>
+                        <a class="btn btn-info" type="button"
+                           href='{{ url_for('admin.edit_server', server_id=server.id) }}'>Edit</a>
                         <a class="btn btn-danger" type="button"
                            href="{{ url_for('admin.del_server', server_id=server.id) }}"
                            onclick='{if(confirm("Are you sure to delete?")){return true;}return false;}'>Delete

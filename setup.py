@@ -13,19 +13,19 @@ def setup_config():
 
 def add_server():
     server = Server()
-    server.name = 'ppe'
+    server.name = 'SLB'
     server.port = 80
-    server.server_name = 'ppe.slb.dp'
-    server.access_log = '/var/log/nginx/ppe_access.log'
-    server.error_log = '/var/log/nginx/ppe_error.log'
+    server.server_name = '_'
+    server.access_log = '/var/log/nginx/slb_access.log'
+    server.error_log = '/var/log/nginx/slb_error.log'
 
     pool = Pool()
     pool.location = '/'
 
     member = Member()
 
-    member.ip = '127.0.0.1'
-    member.port = 8888
+    member.ip= '127.0.0.1'
+    member.port= 8888
     member.fail_timeout = 2
     member.weight = 100
     member.max_fails = 3
@@ -38,8 +38,8 @@ def add_server():
 
     member = Member()
 
-    member.ip = '127.0.0.1'
-    member.port = 8888
+    member.ip= '127.0.0.1'
+    member.port= 8888
     member.fail_timeout = 2
     member.weight = 100
     member.max_fails = 3
@@ -48,8 +48,8 @@ def add_server():
 
     member = Member()
 
-    member.ip = '127.0.0.1'
-    member.port = 8000
+    member.ip= '127.0.0.1'
+    member.port= 8000
     member.fail_timeout = 2
     member.weight = 100
     member.max_fails = 3
