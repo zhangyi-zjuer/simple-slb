@@ -54,6 +54,7 @@ class Config(Base):
 
 
 def init_table(table):
+    table.__table__.drop(engine, checkfirst=True)
     table.metadata.create_all(bind=engine)
 
 

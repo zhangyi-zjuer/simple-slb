@@ -2,7 +2,7 @@
 # Created by zhangyi on 14-3-17.
 
 from flask_wtf import Form
-from wtforms import TextField, HiddenField, IntegerField, SubmitField, TextAreaField
+from wtforms import TextField, IntegerField, SubmitField, TextAreaField
 from wtforms.validators import Required, NumberRange, Length
 
 

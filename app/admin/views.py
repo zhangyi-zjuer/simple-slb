@@ -188,7 +188,7 @@ def deploy():
     except Exception, e:
         message = str(e)
 
-    m = {'errorCode': status, 'taskId': 123}
+    m = {'errorCode': status}
 
     if status != 0:
         m['message'] = message or 'Deploy Failed'
@@ -219,8 +219,7 @@ def get_form_from_db(obj, form):
 
 
 def save_nginx_config(nginx_config_dir):
-    servers = Server.query.all()
-    for server in servers:
+    for server in Server.query.all():
         config = generate_nginx_config(server)
         with open(nginx_config_dir + '/' + server.name, 'w') as f:
             f.write(config)

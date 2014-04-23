@@ -6,50 +6,28 @@ from app.models import *
 from app.database import DbUtil
 
 
-def setup_config():
+def set_config():
     DbUtil.add([Config('NGINX_CONFIG_DIR', '/etc/nginx/sites-enabled/'),
                 Config('NGINX_RELOAD_CMD', '/usr/sbin/nginx -s reload')])
 
 
-def add_server():
+def add_slb_server():
     server = Server()
     server.name = 'SLB'
     server.port = 80
     server.server_name = '_'
+    server.description = u'SLB路由'
     server.access_log = '/var/log/nginx/slb_access.log'
     server.error_log = '/var/log/nginx/slb_error.log'
 
     pool = Pool()
     pool.location = '/'
+    pool.description = u'重定向到SLB服务端口'
 
     member = Member()
 
-    member.ip= '127.0.0.1'
-    member.port= 8888
-    member.fail_timeout = 2
-    member.weight = 100
-    member.max_fails = 3
-
-    pool.members.append(member)
-    server.pools.append(pool)
-
-    pool = Pool()
-    pool.location = '/test'
-
-    member = Member()
-
-    member.ip= '127.0.0.1'
-    member.port= 8888
-    member.fail_timeout = 2
-    member.weight = 100
-    member.max_fails = 3
-
-    pool.members.append(member)
-
-    member = Member()
-
-    member.ip= '127.0.0.1'
-    member.port= 8000
+    member.ip = '127.0.0.1'
+    member.port = 8888
     member.fail_timeout = 2
     member.weight = 100
     member.max_fails = 3
@@ -61,24 +39,17 @@ def add_server():
 
 
 def setup():
-    if os.path.exists('./slb.db'):
-        print "Database File 'slb.db' already exsits"
-        r = raw_input("Do you want re setup (y/n) : ").lower()
-        while not r in ['y', 'n', 'yes', 'no']:
-            r = raw_input("Please Enter correct character (y or n): ").lower()
+    r = raw_input("If you have already setup, All Data will removed. Do you want setup?(y/n) ").lower()
+    while not r in ['y', 'n', 'yes', 'no']:
+        r = raw_input("Please Enter correct character (y or n): ").lower()
 
-        if 'y' in r:
-            os.remove('./slb.db')
-            init_db()
-            print 'Set up Successfully'
-        else:
-            print 'Nothing Changed'
-    else:
+    if 'y' in r:
         init_db()
-        print 'New Database Set up Successfully'
-
+        print 'Set up Successfully'
+    else:
+        print 'Nothing Changed'
 
 if __name__ == "__main__":
     setup()
-    setup_config()
-    add_server()
+    set_config()
+    add_slb_server()

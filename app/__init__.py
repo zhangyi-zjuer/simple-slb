@@ -4,6 +4,7 @@ import sys
 
 from flask import Flask
 from flask_bootstrap import Bootstrap
+
 from database import session as database_session
 
 # set encoding
